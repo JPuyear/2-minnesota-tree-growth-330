@@ -1,2 +1,2 @@
-# minnesota-tree-growth
+# Lab 2: minnesota-tree-growth
 RStudio
