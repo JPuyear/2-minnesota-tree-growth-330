@@ -479,15 +479,17 @@ often important for understanding and communicating data structure.
 > get the top three trees. Report the tree IDs**
 
 ```         
-| treeID|   rad_ib| age|
-|------:|--------:|---:|
-|    128| 238.8850|  82|
-|    157| 217.8700|  85|
-|    135| 210.1874|  84|
 ```
 :::
 
-Tree 128; 238.8850 mm, Tree 157; 217.8700 mm, Tree 135; 210.1874 mm
+| treeID |   rad_ib | age |
+|-------:|---------:|----:|
+|    128 | 238.8850 |  82 |
+|    157 | 217.8700 |  85 |
+|    135 | 210.1874 |  84 |
+
+The top three trees are tree 128; 238.8850 mm, Tree 157; 217.8700 mm,
+Tree 135; 210.1874 mm.
 
 ::: {#reducing-columns .section .level2}
 ## 4. Reducing Columns {.anchored anchor-id="reducing-columns"}
@@ -624,16 +626,19 @@ in the `data.frame` can be referenced when defining new columns.
 > ```         
 > tree_mutate <- tree_mod %>%  +     mutate(dbh = rad_ib_mm*10) %>%  +     mutate(ba_m2 = dbh^2*.00007854)
 >
-> tree_mutate %>% 
-> filter(year == 2007, species == "POTR") %>% 
-> print(mean(ba_m2))
+> > tree_mutate %>% 
+> +     filter(year == 2007, species == "POTR") %>% 
+> +     summarize(ba_m2_07 = mean(ba_m2, na.rm = TRUE))
+>   ba_m2_07
 > ```
+
+The mean basal area for aspen in 2007 was .00924156 m\^2.
 ::::::
 
 ::::::: {#case_when-if_else .section .level2}
 ## 7. case_when / if_else {.anchored anchor-id="case_when-if_else"}
 
-Mayn times the values we want to assign a new column using `mutate()`
+Many times the values we want to assign a new column using `mutate()`
 are conditional on the values in other columns. One approach is to use
 the dplyr's `if_else()` function, which is defined as
 `if_else(condition, true, false, missing = NULL)`, where condition is a
@@ -641,15 +646,33 @@ logical vector created using one or more vectors and logical operators.
 
 > **Question 15: Lets say for the sake of our study, trees are not
 > established until they are 5 years of age. Use `if_else` to add a
-> boolean column to our dataset called `established` that is TRUE if the
-> age is greater then 5 and FALSE if less then or equal to five. Once
-> added, use count (see ?count) to determine how many records are from
-> estabilshed trees?**
+> Boolean column to our data set called `established` that is TRUE if
+> the age is greater then 5 and FALSE if less then or equal to five.
+> Once added, use count (see ?count) to determine how many records are
+> from established trees.**
+
+``` r
+ tree <- tree %>% 
+  mutate(is_old = if_else(age >= 5, TRUE, FALSE))
+  count(tree_old)
+```
+
+| tree_old |      n |
+|:---------|-------:|
+| FALSE    |   6951 |
+| TRUE     | 124435 |
+
+There are 124,435 records from established trees.
+
+```         
+
+  tree_old      n 1    FALSE   6951 2     TRUE 124435
+```
 
 `case_when()` provides a vectorized way to apply multiple conditional
 statements. It is commonly used for creating new variables based on
-conditions. In `case_when()`, each condition is evaluated in order, and
-the first one that is TRUE determines the output. `case_when()` takes
+conditions. *In `case_when()`, each condition is evaluated in order, and
+the first one that is TRUE determines the output. `case_when()`* takes
 one or more arguments, where each argument, is a two-sided formula where
 the left side is separated by the right side by a tilde symbol \~. The
 left side is a logical vector created using one or more vectors and
@@ -682,7 +705,7 @@ case_when(
   condition2 ~ result2,
   condition3 ~ result3,
   TRUE ~ default_result
-)
+)tree <- tree %>% mutate(DBH_class = case_when( dbh_cm > 0 & dbh_cm <= 2.5 ~ "seedling", dbh_cm > 2.5 & dbh_cm <= 10 ~ "sapling", dbh_cm > 10 & dbh_cm <= 30 ~ "pole", dbh_cm > 30 ~ "sawlog" )) %>% filter(year == 2007)
 ```
 :::
 
@@ -699,10 +722,33 @@ classification:
 > **Question 16: Use `mutate` and `case_when` to add a new column to you
 > data.frame that classifies each tree into the proper DBH_class. Once
 > done, limit your dataset to the year 2007 and report the number of
-> each class with count.**
+> each class with count**
 :::::::
 
-::: {#summarizing .section .level2}
+``` r
+tree <- tree %>%  
++ mutate(dbh_class = case_when(
++ dbh_cm > 0 & dbh_cm <= 2.5  ~ "seedling",
++ dbh_cm > 2.5 & dbh_cm <= 10 ~ "sapling",
++ dbh_cm > 10 & dbh_cm <= 30  ~ "pole",
++ dbh_cm > 30                 ~ "sawlog"))
+
+
+Count_7 <- tree %>% 
++ filter(year == 2007) %>% 
++ count(dbh_class)
+```
+
+| dbh_class |    n |
+|:----------|-----:|
+| pole      |  473 |
+| sapling   | 1817 |
+| sawlog    |    1 |
+
+There are 473 pole trees, 1817 sapling trees, and 1 sawlog tree.
+
+::: {.section .level2}
+
 ## 8. Summarizing {.anchored anchor-id="summarizing"}
 
 `summarize()` collapses a `data.frame` to a single row. We can use
@@ -715,16 +761,32 @@ subsequent arguments define how rows should be collapsed.
 > their statistical meaning.**
 
 `summarize()` is often the most useful when applied to groups of data
-(e.g species) rather then entire datasets!
+(e.g species) rather then entire data sets!
 :::
+
+``` r
+dbh_07_summarize <- tree %>%  
++ filter(year == 2007) %>%  
++ summarize(dbh_mean_07 = mean(dbh_cm), dbh_sd_07 = sd(dbh_cm))
+```
+
+| dbh_mean_07 | dbh_sd_07 |
+|------------:|----------:|
+|    8.046755 |  3.069321 |
+
+The mean dbh is 8.047 cm in 2007, and the standard deviation is 3.069.
+Mean is the average of a dataset, while standard deviation is a measure
+of variance in a datset calculated by averaging a squared sum of
+distances from the mean and taking its square root. A high standard
+deviation suggests high variation in the data, since the sample size is
+relatively high at 2291 observations for 2007.
 
 :::::: {#grouped-data .section .level2}
 ## 9. Grouped data {.anchored anchor-id="grouped-data"}
 
-`group_by()` is used to group data by one or more variables. It is
-commonly used in conjunction with functions like `summarize()`,
-`mutate()`, or `filter()` to perform operations on subsets of data
-within a data.frame.
+`()` is used to group data by one or more variables. It is commonly used
+in conjunction with functions like `summarize()`, `mutate()`, or
+`filter()` to perform operations on subsets of data within a data.frame.
 
 The first argument in `group_by()` is the d`ata.frame` to group and
 subsequent arguments identify the columns, or combination of columns,
@@ -753,32 +815,58 @@ glimpse(trees_by_id)
 
 If `filter()` is passed a grouped data.frame and the filtering condition
 uses a summary function or group characteristic (e.g., number of rows
-computed using the n()), the result will be group specific. Similarly,
-`slice()` and its various flavors subset rows within each group.Passing
-grouped and ungrouped data to `arrange()` gives the same result, unless
-you set the function's optional argument `.by_group` to TRUE, in which
-case it will order first by the grouping. Recall, the functions
-select(), rename(), mutate(), transmute(), and relocate() operate on
-data.frame columns. Because `rename()` only affects the column name and
-position, its behavior is the same given grouped or ungrouped data.
+computed using the n()), the result will be group specific.
+
+Similarly, `slice()` and its various flavors subset rows within each
+group.
+
+Passing grouped and ungrouped data to `arrange()` gives the same result,
+unless you set the function's optional argument `.by_group` to TRUE, in
+which case it will order first by the grouping.
+
+Recall, the functions select(), rename(), mutate(), transmute(), and
+relocate() operate on data.frame columns. Because `rename()` only
+affects the column name and position, its behavior is the same given
+grouped or ungrouped data.
+
 Similarly, a grouped select() is the same as an ungrouped select(),
 except grouping columns are always included in the resulting column
 subset. Similar to a grouped `filter()`, a grouped `mutate()` has
 different behavior if your new column definition uses a summary function
 or some other group specific characteristic (e.g. max/min/n()/lag/diff,
-etc.). As mentioned, `summarize()` is most useful when applied to
-grouped data. Given a grouped`data.frame`, column summaries requested
-from `summarize()` are applied to each group. Each time you apply
-`summarize()` to a grouped `data.frame`, the default behavior is to
-remove the last grouping level.
+etc.).
+
+As mentioned, `summarize()` is most useful when applied to grouped data.
+Given a grouped`data.frame`, column summaries requested from
+`summarize()` are applied to each group.
+
+Each time you apply `summarize()` to a grouped `data.frame`, the default
+behavior is to remove the last grouping level.
 
 > **Question 18: Compute the *per species* mean tree age using only
 > those ages recorded in 2003. Identify the three species with the
 > oldest mean age.**
 :::
-::::::
 
-::: {#counting .section .level2}
+year 2003
+
+group by species
+
+take the average age of each species with summarize
+
+arrange -species_age
+
+slice n = 3
+
+| species | sp_age_avg |
+|:--------|-----------:|
+| THOC    |  126.63830 |
+| FRNI    |   83.08333 |
+| PIST    |   73.28571 |
+
+The three oldest -growing species in 2003 are *Thuja occidentalis,
+Fraxinus nigra*, and *Pinus strobus*.
+
 ## 10. Counting {.anchored anchor-id="counting"}
 
 We often need to know the number of rows, perhaps by group, within a
@@ -798,21 +886,71 @@ distinct values:
 > **Question 19: In a single summarize call, find the number of unique
 > years with records in the data set along with the first and last year
 > recorded?**
+::::::
 
+> ``` r
+> tree %>%
+>
+> + summarize( 
+> + n_years = n_distinct(year), 
+> + first_year = min(year, na.rm = TRUE), 
+> + last_year = max(year, na.rm = TRUE) 
+> )
+> ```
+
+| n_years | first_year | last_year |
+|:--------|------------|----------:|
+| 111     | 1897       |      2007 |
+
+::: {.section .level2}
 > **Question 20: Determine the stands with the largest number of unique
 > years recorded. Report all stands with largest (or tied with the
 > largest) temporal record.**
 :::
 :::::::::::::::::::::::::::::
 
+``` r
+tree %>% 
++     group_by(standID) %>% 
++     summarize(n_years = n_distinct(year)) %>% 
++     slice_max(n_years) %>% 
++ kable()
+```
+
+| standID | n_years |
+|--------:|--------:|
+|       1 |     111 |
+|      15 |     111 |
+|      16 |     111 |
+|      17 |     111 |
+|      24 |     111 |
+
+Stands 1, 15, 16, 17, and 24 all have 111 years of records.
+
 ::: {#final-question .section .level1}
 # Final Question:
 
 We are interested in the annual DBH growth rate of each species through
-time, but we only want to include trees with at least a 10 year growth
-record. To identify this, we need to idnetify the per year growth made
-by each tree, there total growth record, and then average that, and
-compute the standard deviation, across the species.
+time, but we only want to include trees with at least a 10-year growth
+record. To identify this, we need to identify
+
+the per year growth made by each tree,
+
+their total growth record,
+
+and then average that,
+
+and compute the standard deviation, across the species.
+
+```         
+tree <- tree %>%  + mutate(dbh_lag = lag(dbh_cm, n=1))
+```
+
+So how by much did each tree grow each year?
+
+Is there a difference between calculating total growth over total years
+versus calculating growth each year, aggregating, and then dividing the
+total growth per year?
 
 > Use a combination of dplyr verbs to compute these values and report
 > the 3 species with the fastest growth, and the 3 species with the

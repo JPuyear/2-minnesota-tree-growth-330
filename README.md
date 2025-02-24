@@ -38,3 +38,77 @@ Question 8
 |    128| 238.8850|  82|
 |    157| 217.8700|  85|
 |    135| 210.1874|  84|
+
+
+Question 15
+
+|tree_old |      n|
+|:--------|------:|
+|FALSE    |   6951|
+|TRUE     | 124435|
+
+
+
+|dbh_class |      n|
+|:---------|------:|
+|pole      |  12692|
+|sapling   | 100348|
+|sawlog    |     17|
+|seedling  |  18329|
+
+|dbh_class |    n|
+|:---------|----:|
+|pole      |  473|
+|sapling   | 1817|
+|sawlog    |    1|
+
+| dbh_mean_07| dbh_sd_07|
+|-----------:|---------:|
+|    8.046755|  3.069321|
+
+
+
+|species | sp_age_avg|
+|:-------|----------:|
+|THOC    |  126.63830|
+|FRNI    |   83.08333|
+|PIST    |   73.28571|
+
+> tree %>% 
++     summarize(
++         n_years = n_distinct(year), 
++         first_year = min(year, na.rm = TRUE), 
++         last_year = max(year, na.rm = TRUE)
++     )
+  n_years first_year last_year
+1     111       1897      2007
+
+tree %>%
+
++ summarize( 
+
++ n_years = n_distinct(year), 
+
++ first_year = min(year, na.rm = TRUE), 
+
++ last_year = max(year, na.rm = TRUE) 
+
++ ) n_years first_year last_year 1 111 1897 2007
+
+  | n_years  |first_year | last_year|
+  |:---------|-----------|---------:|
+1 |    111   |    1897   |    2007  |
+
+| standID| n_years|
+|-------:|-------:|
+|       1|     111|
+|      15|     111|
+|      16|     111|
+|      17|     111|
+|      24|     111|
+
+> tree %>% 
++     group_by(standID) %>% 
++     summarize(n_years = n_distinct(year)) %>% 
++     slice_max(n_years) %>% 
++ kable()
