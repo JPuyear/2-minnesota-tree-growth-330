@@ -37,7 +37,7 @@ onclick="window.quartoToggleColorScheme(); return false;"}
 :::::::
 ::::::::
 
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: {#quarto-content .quarto-container .page-columns .page-rows-contents .page-layout-article .page-navbar}
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: {#quarto-content .quarto-container .page-columns .page-rows-contents .page-layout-article .page-navbar}
 ::: {#quarto-margin-sidebar .sidebar .margin-sidebar}
 ## On this page {#toc-title}
 
@@ -86,7 +86,7 @@ onclick="window.quartoToggleColorScheme(); return false;"}
 -   [Rubric](#rubric){#toc-rubric .nav-link scroll-target="#rubric"}
 :::
 
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: {#quarto-document-content .content role="main"}
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: {#quarto-document-content .content role="main"}
 ::::: {#title-block-header .quarto-title-block .default}
 ::: quarto-title
 # Lab 2: Minnesota tree growth {#lab-2-minnesota-tree-growth .title}
@@ -208,7 +208,7 @@ argument*.
 #### Key Differences {.anchored anchor-id="key-differences"}
 
 | Feature | `|>` (Base R) | `%>%` (Tidyverse) |
-|:------------------|:----------------------|:-----------------------------|
+|:---|:---|:---|
 | Available in | R 4.1.0+ (no extra packages) | {magrittr} package |
 | First argument | Always passed as first argument | Can use . for flexibility |
 | Function compatibility | Works with most functions | Works better with dplyr and NSE functions |
@@ -544,7 +544,6 @@ glimpse(ID_columns)
 
 Rows: 131,386
 Columns: 2
-
 ```
 
 > **Question 12: Find a selection pattern that captures all columns with
@@ -554,7 +553,7 @@ Columns: 2
 > ``` r
 > glimpse(tree %>% select(ends_with("ID"), starts_with("stand")))
 >
-> Rows: 131,386 Columns: 3
+> Rows: 131386 Columns: 2
 > ```
 :::
 
@@ -585,7 +584,8 @@ subsequent arguments takes the form new_name = old_name.
 > (e.g. `<-`). Use glimpse to view your new data.frame.**
 
 ``` r
-tree_mod <- tree %>%  + rename(rad_ib_mm = rad_ib, growth_inc_mm = inc)
+
+tree <- tree %>%  + rename(rad_ib_mm = rad_ib, growth_inc_mm = inc)
 glimpse(tree_mod)
 Rows: 131386
 Columns: 8
@@ -624,9 +624,9 @@ in the `data.frame` can be referenced when defining new columns.
 > species `POTR` in 2007?**
 >
 > ```         
-> tree_mutate <- tree_mod %>%  +     mutate(dbh = rad_ib_mm*10) %>%  +     mutate(ba_m2 = dbh^2*.00007854)
+> tree <- tree %>%  +     mutate(dbh = rad_ib_mm/10) %>%  +     mutate(ba_m2 = dbh^2*.00007854)
 >
-> > tree_mutate %>% 
+> > tree %>% 
 > +     filter(year == 2007, species == "POTR") %>% 
 > +     summarize(ba_m2_07 = mean(ba_m2, na.rm = TRUE))
 >   ba_m2_07
@@ -654,13 +654,13 @@ logical vector created using one or more vectors and logical operators.
 ``` r
  tree <- tree %>% 
   mutate(is_old = if_else(age >= 5, TRUE, FALSE))
-  count(tree_old)
+  count(is_old)
 ```
 
-| tree_old |      n |
-|:---------|-------:|
-| FALSE    |   6951 |
-| TRUE     | 124435 |
+| is_old |      n |
+|:-------|-------:|
+| FALSE  |   6951 |
+| TRUE   | 124435 |
 
 There are 124,435 records from established trees.
 
@@ -728,10 +728,10 @@ classification:
 ``` r
 tree <- tree %>%  
 + mutate(dbh_class = case_when(
-+ dbh_cm > 0 & dbh_cm <= 2.5  ~ "seedling",
-+ dbh_cm > 2.5 & dbh_cm <= 10 ~ "sapling",
-+ dbh_cm > 10 & dbh_cm <= 30  ~ "pole",
-+ dbh_cm > 30                 ~ "sawlog"))
++ dbh > 0 & dbh <= 2.5  ~ "seedling",
++ dbh > 2.5 & dbh <= 10 ~ "sapling",
++ dbh > 10 & dbh <= 30  ~ "pole",
++ dbh > 30              ~ "sawlog"))
 
 
 Count_7 <- tree %>% 
@@ -745,11 +745,11 @@ Count_7 <- tree %>%
 | sapling   | 1817 |
 | sawlog    |    1 |
 
-There are 473 pole trees, 1817 sapling trees, and 1 sawlog tree.
+There are 473 pole trees, 1817 sapling trees, and 1 sawlog tree. There
+are no seedlings.
 
 ::: {.section .level2}
-
-## 8. Summarizing {.anchored anchor-id="summarizing"}
+## 8. Summarizing {#summarizing .anchored anchor-id="summarizing"}
 
 `summarize()` collapses a `data.frame` to a single row. We can use
 `summarize()` to compute summary statistics for one or more columns in a
@@ -867,7 +867,7 @@ slice n = 3
 The three oldest -growing species in 2003 are *Thuja occidentalis,
 Fraxinus nigra*, and *Pinus strobus*.
 
-## 10. Counting {.anchored anchor-id="counting"}
+## 10. Counting {#counting .anchored anchor-id="counting"}
 
 We often need to know the number of rows, perhaps by group, within a
 dataset. Rows are counted using the `n()` helper function, which is a
@@ -942,16 +942,6 @@ and then average that,
 
 and compute the standard deviation, across the species.
 
-```         
-tree <- tree %>%  + mutate(dbh_lag = lag(dbh_cm, n=1))
-```
-
-So how by much did each tree grow each year?
-
-Is there a difference between calculating total growth over total years
-versus calculating growth each year, aggregating, and then dividing the
-total growth per year?
-
 > Use a combination of dplyr verbs to compute these values and report
 > the 3 species with the fastest growth, and the 3 species with the
 > slowest growth. (\*\* You will need to use either `lag()` or `diff()`
@@ -959,7 +949,45 @@ total growth per year?
 
 > Lastly, find and include an image of the fastest growing species. Add
 > the image to your images directory.
+
+```         
+tree %>%
+     group_by(treeID) %>%
+     filter(n() >= 10) %>%  # Keep only trees with at least 10 years of data
+     arrange(treeID, year) %>%
+     mutate(annual_growth = dbh - lag(dbh)) %>%  # Calculate per-year DBH growth
+     filter(!is.na(annual_growth)) %>%  # Remove first year (no lag value)
+     group_by(species) %>%
+     summarize(mean_growth = mean(annual_growth, na.rm = TRUE),  # Avg growth per species
+               sd_growth = sd(annual_growth, na.rm = TRUE)) %>%  # Std dev per species
+     arrange(desc(mean_growth)) -> species_growth  # Sort species by mean growth rate
+
+ fastest_growth <- head(species_growth, 3)
+ slowest_growth <- tail(species_growth, 3)
+ 
+ list(fastest_growth = fastest_growth, slowest_growth = slowest_growth)
+```
 :::
+
+::: {.section .level1}
+| species | mean_growth | sd_growth |
+|:--------|------------:|----------:|
+| PIRE    |   0.1789525 | 0.1289417 |
+| POTR    |   0.1654035 | 0.1087689 |
+| PIBA    |   0.1629762 | 0.1234143 |
+
+| species | mean_growth | sd_growth |
+|:--------|------------:|----------:|
+| QURU    |   0.0837715 | 0.0434405 |
+| THOC    |   0.0764846 | 0.0454603 |
+| LALA    |   0.0749381 | 0.0563780 |
+:::
+
+The three fastest-growing species are Pinus resinosa, Populus
+tremuloides, and Pinus banksiana. The three slowest-growing species are
+*Quercus rubra, Thuja occidentalis,* and *Latrix laricina*.
+
+![](imgs/resinosa05.jpg){width="204" height="28"}
 
 ::: {#rubric .section .level1}
 # Rubric
@@ -979,5 +1007,5 @@ Connect your project to github and submit a URL of the rendered document
 
 **Total**: 100
 :::
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

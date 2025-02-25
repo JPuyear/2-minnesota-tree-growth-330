@@ -538,9 +538,9 @@ handling non-standard evaluation in dplyr. Must be loaded with
 <h4 class="anchored">Key Differences</h4>
 <table>
 <colgroup>
-<col width="25%" />
-<col width="31%" />
-<col width="42%" />
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -746,19 +746,33 @@ the <code>trees_dat.csv</code> file found from Dyrad and saved to your
 <code>glimpse</code> to understand the structure and names of the
 dataset. Decribe the structure and what you see in the
 dataset?</strong></p>
+<pre class="r"><code>tree &lt;-read.csv(&quot;data/tree_dat.csv&quot;) glimpse(tree)</code></pre>
+<p>There are 8 columns and 131,386 rows. Each tree in the study is
+cataloged by stand, species, and observations are made by year. The age
+of the tree is given, and the rest of this information can be found in
+the README of the dataset.</p>
 </blockquote>
 <blockquote>
-<p><strong>Question 2: How many reocrds have been made in stand
+<p><strong>Question 2: How many records have been made in stand
 1?</strong></p>
+<pre class="r"><code>stand_count &lt;- tree %&gt;%  + filter(standID == 1) %&gt;%  + count()</code></pre>
+<p>There are 979 observations in stand 1.</p>
 </blockquote>
 <blockquote>
 <p><strong>Question 3: How many records of the Abies balsamea and Pinus
 strobus species have been made?</strong></p>
+<blockquote>
+<p>abies_pinus &lt;- tree %&gt;% + filter(species %in% c(“ABBA”,
+“PIST”)) nrow(abies_pinus) [1] 17221</p>
+</blockquote>
+<pre class="r"><code>17221 records</code></pre>
 </blockquote>
 <blockquote>
 <p><strong>Question 4: How many trees are older then 200 years old in
 the last year of the dataset?</strong></p>
+<pre><code> tree %&gt;%  + filter(year == max(year), age &gt; 200) </code></pre>
 </blockquote>
+<p>there are 7 trees older than 200 years from 2007</p>
 </div>
 <div id="slicing-rows" class="section level2 anchored" anchor-id="slicing-rows">
 <h2 class="anchored">2. Slicing rows</h2>
@@ -772,21 +786,38 @@ with the max/min values for a variable V.
 last row of the given data.frame, respectively <code>slice_sample</code>
 - return a random subset of rows, with or without replacement, and with
 specified selection probability</p>
+<pre><code> tree %&gt;%  + arrange(-age) %&gt;%  + slice_head(n=5)   </code></pre>
 <p>Change the n argument in these functions to return more than one row
 (i.e., the default argument is n = 1), or use the prop argument to
 return the desired proportion of rows.</p>
 <blockquote>
 <p><strong>Question 5: What is the oldest tree in the dataset found
 using slice_max?</strong></p>
+<pre><code>&gt; tree %&gt;%  + slice_max(age)</code></pre>
 </blockquote>
 <blockquote>
+<p>269 years</p>
 <p><strong>Question 6: Find the oldest 5 trees recorded in 2001. Use the
 help docs to understand optional parameters</strong></p>
+<pre><code>&gt; tree %&gt;% 
++ filter(year == 2001) %&gt;% 
++ arrange(-age) %&gt;% 
++ slice_head(n=5)
+
+| treeID| standID| age|
+|------:|-------:|---:|
+|     24|       2| 263|
+|     25|       2| 259|
+|   1595|      24| 212|
+|   1598|      24| 206|
+|   1712|      26| 206|</code></pre>
 </blockquote>
 <blockquote>
 <p><strong>Question 7: Using slice_sample, how many trees are in a 30%
 sample of those recorded in 2002?</strong></p>
 </blockquote>
+<pre><code></code></pre>
+<p>There are 687 observed trees</p>
 </div>
 <div id="arranging-rows" class="section level2 anchored" anchor-id="arranging-rows">
 <h2 class="anchored">3. Arranging Rows</h2>
@@ -806,7 +837,36 @@ subset by <em>descending</em> radius at breast height (rad_ib) and use
 slice_head() to get the top three trees. Report the tree
 IDs</strong></p>
 </blockquote>
+<pre><code></code></pre>
 </div>
+<table>
+<thead>
+<tr class="header">
+<th align="right">treeID</th>
+<th align="right">rad_ib</th>
+<th align="right">age</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">128</td>
+<td align="right">238.8850</td>
+<td align="right">82</td>
+</tr>
+<tr class="even">
+<td align="right">157</td>
+<td align="right">217.8700</td>
+<td align="right">85</td>
+</tr>
+<tr class="odd">
+<td align="right">135</td>
+<td align="right">210.1874</td>
+<td align="right">84</td>
+</tr>
+</tbody>
+</table>
+<p>The top three trees are tree 128; 238.8850 mm, Tree 157; 217.8700 mm,
+Tree 135; 210.1874 mm.</p>
 <div id="reducing-columns" class="section level2 anchored" anchor-id="reducing-columns">
 <h2 class="anchored">4. Reducing Columns</h2>
 <p>Another common task is to select a subset of columns in the dataset.
@@ -816,11 +876,47 @@ This is accomplished using <code>select()</code>.</p>
 to</strong> <span class="math display">\[treeID, stand, year,
 and radius at breast height\]</span>. Filter to only those in stand 3
 with records from 2007, and use slice_min to pull the smallest three
-trees meaured that year.</p>
+trees measured that year.</p>
 </blockquote>
 <blockquote>
+<table>
+<thead>
+<tr class="header">
+<th align="right">treeID</th>
+<th align="right">standID</th>
+<th align="right">year</th>
+<th align="right">rad_ib</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">50</td>
+<td align="right">3</td>
+<td align="right">2007</td>
+<td align="right">47.396</td>
+</tr>
+<tr class="even">
+<td align="right">56</td>
+<td align="right">3</td>
+<td align="right">2007</td>
+<td align="right">48.440</td>
+</tr>
+<tr class="odd">
+<td align="right">36</td>
+<td align="right">3</td>
+<td align="right">2007</td>
+<td align="right">54.925</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>&gt;smallest3_07 &lt;- tree %&gt;% 
++ select(treeID, standID, year, rad_ib) %&gt;% 
++ filter(year == 2007, standID == 3) %&gt;% 
++ slice_min(order_by = rad_ib, n = 3)</code></pre>
 <p><strong>Question 10: Use select to <em>remove</em> the stand column.
 Use glimspe to show the dataset.</strong></p>
+<p>glimpse(tree %&gt;% select(!stand))</p>
+<p>Rows: 131,386 Columns: 7</p>
 </blockquote>
 <blockquote>
 <p><strong>Question 11: Look at the help document for dplyr::select and
@@ -834,10 +930,20 @@ additional flexibility for specifying columns to retain or exclude. Use
 (i.e., those columns that are in both sets). Use <code>|</code> to
 identify the union of two column sets (i.e., all columns in at least one
 set).</p>
+<p>use ends_with()</p>
+<p>ex:</p>
+<pre class="r"><code>ID_columns &lt;-(tree %&gt;% select(ends_with(&quot;ID&quot;)))
+glimpse(ID_columns)
+
+Rows: 131,386
+Columns: 2</code></pre>
 <blockquote>
 <p><strong>Question 12: Find a selection pattern that captures all
 columns with either ‘ID’ or ‘stand’ in the name. Use glimpse to verify
 the selection.</strong></p>
+<pre class="r"><code>glimpse(tree %&gt;% select(ends_with(&quot;ID&quot;), starts_with(&quot;stand&quot;)))
+
+Rows: 131386 Columns: 2</code></pre>
 </blockquote>
 </div>
 <div id="renaming-columns" class="section level2 anchored" anchor-id="renaming-columns">
@@ -863,6 +969,11 @@ earlier options, be sure that this renaming is permanent, and stays with
 your data.frame (e.g. <code>&lt;-</code>). Use glimpse to view your new
 data.frame.</strong></p>
 </blockquote>
+<pre class="r"><code>
+tree &lt;- tree %&gt;%  + rename(rad_ib_mm = rad_ib, growth_inc_mm = inc)
+glimpse(tree_mod)
+Rows: 131386
+Columns: 8</code></pre>
 </div>
 <div id="creating-new-columns" class="section level2 anchored" anchor-id="creating-new-columns">
 <h2 class="anchored">6. Creating new columns</h2>
@@ -891,11 +1002,18 @@ Where DBH is the diameter at breast height (cm). Use mutate to compute
 DBH in centimeters, and BA in m2 (HINT: Make sure rad_ib is in cm prior
 to computing the diameter!). What is the mean BA_m2 of the the species
 <code>POTR</code> in 2007?</strong></p>
+<pre><code>tree &lt;- tree %&gt;%  +     mutate(dbh = rad_ib_mm/10) %&gt;%  +     mutate(ba_m2 = dbh^2*.00007854)
+
+&gt; tree %&gt;% 
++     filter(year == 2007, species == &quot;POTR&quot;) %&gt;% 
++     summarize(ba_m2_07 = mean(ba_m2, na.rm = TRUE))
+  ba_m2_07</code></pre>
 </blockquote>
+<p>The mean basal area for aspen in 2007 was .00924156 m^2.</p>
 </div>
 <div id="case_when-if_else" class="section level2 anchored" anchor-id="case_when-if_else">
 <h2 class="anchored">7. case_when / if_else</h2>
-<p>Mayn times the values we want to assign a new column using
+<p>Many times the values we want to assign a new column using
 <code>mutate()</code> are conditional on the values in other columns.
 One approach is to use the dplyr’s <code>if_else()</code> function,
 which is defined as
@@ -905,18 +1023,42 @@ logical operators.</p>
 <blockquote>
 <p><strong>Question 15: Lets say for the sake of our study, trees are
 not established until they are 5 years of age. Use <code>if_else</code>
-to add a boolean column to our dataset called <code>established</code>
+to add a Boolean column to our data set called <code>established</code>
 that is TRUE if the age is greater then 5 and FALSE if less then or
 equal to five. Once added, use count (see ?count) to determine how many
-records are from estabilshed trees?</strong></p>
+records are from established trees.</strong></p>
 </blockquote>
+<pre class="r"><code> tree &lt;- tree %&gt;% 
+  mutate(is_old = if_else(age &gt;= 5, TRUE, FALSE))
+  count(is_old)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">is_old</th>
+<th align="right">n</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">FALSE</td>
+<td align="right">6951</td>
+</tr>
+<tr class="even">
+<td align="left">TRUE</td>
+<td align="right">124435</td>
+</tr>
+</tbody>
+</table>
+<p>There are 124,435 records from established trees.</p>
+<pre><code>
+  tree_old      n 1    FALSE   6951 2     TRUE 124435</code></pre>
 <p><code>case_when()</code> provides a vectorized way to apply multiple
 conditional statements. It is commonly used for creating new variables
-based on conditions. In <code>case_when()</code>, each condition is
+based on conditions. <em>In <code>case_when()</code>, each condition is
 evaluated in order, and the first one that is TRUE determines the
-output. <code>case_when()</code> takes one or more arguments, where each
-argument, is a two-sided formula where the left side is separated by the
-right side by a tilde symbol ~. The left side is a logical vector
+output. <code>case_when()</code></em> takes one or more arguments, where
+each argument, is a two-sided formula where the left side is separated
+by the right side by a tilde symbol ~. The left side is a logical vector
 created using one or more vectors and logical operators. The right side
 is the value to use when the left side is TRUE. If no cases are TRUE
 (i.e., none of the arguments’ left sides are TRUE) then a NA is
@@ -941,7 +1083,7 @@ condition:</p>
   condition2 ~ result2,
   condition3 ~ result3,
   TRUE ~ default_result
-)</code></pre>
+)tree &lt;- tree %&gt;% mutate(DBH_class = case_when( dbh_cm &gt; 0 &amp; dbh_cm &lt;= 2.5 ~ &quot;seedling&quot;, dbh_cm &gt; 2.5 &amp; dbh_cm &lt;= 10 ~ &quot;sapling&quot;, dbh_cm &gt; 10 &amp; dbh_cm &lt;= 30 ~ &quot;pole&quot;, dbh_cm &gt; 30 ~ &quot;sawlog&quot; )) %&gt;% filter(year == 2007)</code></pre>
 </div>
 <p>In forestry, DBH_cm can be used to classify a tree using the
 following classification:</p>
@@ -981,9 +1123,44 @@ following classification:</p>
 <code>case_when</code> to add a new column to you data.frame that
 classifies each tree into the proper DBH_class. Once done, limit your
 dataset to the year 2007 and report the number of each class with
-count.</strong></p>
+count</strong></p>
 </blockquote>
 </div>
+<pre class="r"><code>tree &lt;- tree %&gt;%  
++ mutate(dbh_class = case_when(
++ dbh &gt; 0 &amp; dbh &lt;= 2.5  ~ &quot;seedling&quot;,
++ dbh &gt; 2.5 &amp; dbh &lt;= 10 ~ &quot;sapling&quot;,
++ dbh &gt; 10 &amp; dbh &lt;= 30  ~ &quot;pole&quot;,
++ dbh &gt; 30              ~ &quot;sawlog&quot;))
+
+
+Count_7 &lt;- tree %&gt;% 
++ filter(year == 2007) %&gt;% 
++ count(dbh_class)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">dbh_class</th>
+<th align="right">n</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">pole</td>
+<td align="right">473</td>
+</tr>
+<tr class="even">
+<td align="left">sapling</td>
+<td align="right">1817</td>
+</tr>
+<tr class="odd">
+<td align="left">sawlog</td>
+<td align="right">1</td>
+</tr>
+</tbody>
+</table>
+<p>There are 473 pole trees, 1817 sapling trees, and 1 sawlog tree.
+There are no seedlings.</p>
 <div id="summarizing" class="section level2 anchored" anchor-id="summarizing">
 <h2 class="anchored">8. Summarizing</h2>
 <p><code>summarize()</code> collapses a <code>data.frame</code> to a
@@ -997,12 +1174,36 @@ deviation of DBH (in cm) for all trees in 2007. Explain the values you
 found and their statistical meaning.</strong></p>
 </blockquote>
 <p><code>summarize()</code> is often the most useful when applied to
-groups of data (e.g species) rather then entire datasets!</p>
+groups of data (e.g species) rather then entire data sets!</p>
 </div>
+<pre class="r"><code>dbh_07_summarize &lt;- tree %&gt;%  
++ filter(year == 2007) %&gt;%  
++ summarize(dbh_mean_07 = mean(dbh_cm), dbh_sd_07 = sd(dbh_cm))</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="right">dbh_mean_07</th>
+<th align="right">dbh_sd_07</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">8.046755</td>
+<td align="right">3.069321</td>
+</tr>
+</tbody>
+</table>
+<p>The mean dbh is 8.047 cm in 2007, and the standard deviation is
+3.069. Mean is the average of a dataset, while standard deviation is a
+measure of variance in a datset calculated by averaging a squared sum of
+distances from the mean and taking its square root. A high standard
+deviation suggests high variation in the data, since the sample size is
+relatively high at 2291 observations for 2007.</p>
+<div id="grouped-data" class="section level2">
 <div id="grouped-data" class="section level2 anchored" anchor-id="grouped-data">
 <h2 class="anchored">9. Grouped data</h2>
-<p><code>group_by()</code> is used to group data by one or more
-variables. It is commonly used in conjunction with functions like
+<p><code>()</code> is used to group data by one or more variables. It is
+commonly used in conjunction with functions like
 <code>summarize()</code>, <code>mutate()</code>, or
 <code>filter()</code> to perform operations on subsets of data within a
 data.frame.</p>
@@ -1031,31 +1232,64 @@ grouped <code>data.frame</code>?</h3>
 <p>If <code>filter()</code> is passed a grouped data.frame and the
 filtering condition uses a summary function or group characteristic
 (e.g., number of rows computed using the n()), the result will be group
-specific. Similarly, <code>slice()</code> and its various flavors subset
-rows within each group.Passing grouped and ungrouped data to
-<code>arrange()</code> gives the same result, unless you set the
-function’s optional argument <code>.by_group</code> to TRUE, in which
-case it will order first by the grouping. Recall, the functions
-select(), rename(), mutate(), transmute(), and relocate() operate on
-data.frame columns. Because <code>rename()</code> only affects the
-column name and position, its behavior is the same given grouped or
-ungrouped data. Similarly, a grouped select() is the same as an
-ungrouped select(), except grouping columns are always included in the
-resulting column subset. Similar to a grouped <code>filter()</code>, a
-grouped <code>mutate()</code> has different behavior if your new column
+specific.</p>
+<p>Similarly, <code>slice()</code> and its various flavors subset rows
+within each group.</p>
+<p>Passing grouped and ungrouped data to <code>arrange()</code> gives
+the same result, unless you set the function’s optional argument
+<code>.by_group</code> to TRUE, in which case it will order first by the
+grouping.</p>
+<p>Recall, the functions select(), rename(), mutate(), transmute(), and
+relocate() operate on data.frame columns. Because <code>rename()</code>
+only affects the column name and position, its behavior is the same
+given grouped or ungrouped data.</p>
+<p>Similarly, a grouped select() is the same as an ungrouped select(),
+except grouping columns are always included in the resulting column
+subset. Similar to a grouped <code>filter()</code>, a grouped
+<code>mutate()</code> has different behavior if your new column
 definition uses a summary function or some other group specific
-characteristic (e.g. max/min/n()/lag/diff, etc.). As mentioned,
-<code>summarize()</code> is most useful when applied to grouped data.
-Given a grouped<code>data.frame</code>, column summaries requested from
-<code>summarize()</code> are applied to each group. Each time you apply
-<code>summarize()</code> to a grouped <code>data.frame</code>, the
-default behavior is to remove the last grouping level.</p>
+characteristic (e.g. max/min/n()/lag/diff, etc.).</p>
+<p>As mentioned, <code>summarize()</code> is most useful when applied to
+grouped data. Given a grouped<code>data.frame</code>, column summaries
+requested from <code>summarize()</code> are applied to each group.</p>
+<p>Each time you apply <code>summarize()</code> to a grouped
+<code>data.frame</code>, the default behavior is to remove the last
+grouping level.</p>
 <blockquote>
 <p><strong>Question 18: Compute the <em>per species</em> mean tree age
 using only those ages recorded in 2003. Identify the three species with
 the oldest mean age.</strong></p>
 </blockquote>
 </div>
+<p>year 2003</p>
+<p>group by species</p>
+<p>take the average age of each species with summarize</p>
+<p>arrange -species_age</p>
+<p>slice n = 3</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">species</th>
+<th align="right">sp_age_avg</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">THOC</td>
+<td align="right">126.63830</td>
+</tr>
+<tr class="even">
+<td align="left">FRNI</td>
+<td align="right">83.08333</td>
+</tr>
+<tr class="odd">
+<td align="left">PIST</td>
+<td align="right">73.28571</td>
+</tr>
+</tbody>
+</table>
+<p>The three oldest -growing species in 2003 are <em>Thuja occidentalis,
+Fraxinus nigra</em>, and <em>Pinus strobus</em>.</p>
 </div>
 <div id="counting" class="section level2 anchored" anchor-id="counting">
 <h2 class="anchored">10. Counting</h2>
@@ -1077,6 +1311,34 @@ returns the number of group specific distinct values:</p>
 unique years with records in the data set along with the first and last
 year recorded?</strong></p>
 </blockquote>
+</div>
+</div>
+<blockquote>
+<pre class="r"><code>tree %&gt;%
+
++ summarize( 
++ n_years = n_distinct(year), 
++ first_year = min(year, na.rm = TRUE), 
++ last_year = max(year, na.rm = TRUE) 
+)</code></pre>
+</blockquote>
+<table>
+<thead>
+<tr class="header">
+<th align="left">n_years</th>
+<th>first_year</th>
+<th align="right">last_year</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">111</td>
+<td>1897</td>
+<td align="right">2007</td>
+</tr>
+</tbody>
+</table>
+<div class="section level2">
 <blockquote>
 <p><strong>Question 20: Determine the stands with the largest number of
 unique years recorded. Report all stands with largest (or tied with the
@@ -1084,13 +1346,51 @@ largest) temporal record.</strong></p>
 </blockquote>
 </div>
 </div>
+<pre class="r"><code>tree %&gt;% 
++     group_by(standID) %&gt;% 
++     summarize(n_years = n_distinct(year)) %&gt;% 
++     slice_max(n_years) %&gt;% 
++ kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="right">standID</th>
+<th align="right">n_years</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">111</td>
+</tr>
+<tr class="even">
+<td align="right">15</td>
+<td align="right">111</td>
+</tr>
+<tr class="odd">
+<td align="right">16</td>
+<td align="right">111</td>
+</tr>
+<tr class="even">
+<td align="right">17</td>
+<td align="right">111</td>
+</tr>
+<tr class="odd">
+<td align="right">24</td>
+<td align="right">111</td>
+</tr>
+</tbody>
+</table>
+<p>Stands 1, 15, 16, 17, and 24 all have 111 years of records.</p>
 <div id="final-question" class="section level1">
 <h1>Final Question:</h1>
 <p>We are interested in the annual DBH growth rate of each species
-through time, but we only want to include trees with at least a 10 year
-growth record. To identify this, we need to idnetify the per year growth
-made by each tree, there total growth record, and then average that, and
-compute the standard deviation, across the species.</p>
+through time, but we only want to include trees with at least a 10-year
+growth record. To identify this, we need to identify</p>
+<p>the per year growth made by each tree,</p>
+<p>their total growth record,</p>
+<p>and then average that,</p>
+<p>and compute the standard deviation, across the species.</p>
 <blockquote>
 <p>Use a combination of dplyr verbs to compute these values and report
 the 3 species with the fastest growth, and the 3 species with the
@@ -1102,7 +1402,81 @@ the Help pages)</p>
 <p>Lastly, find and include an image of the fastest growing species. Add
 the image to your images directory.</p>
 </blockquote>
+<pre><code>tree %&gt;%
+     group_by(treeID) %&gt;%
+     filter(n() &gt;= 10) %&gt;%  # Keep only trees with at least 10 years of data
+     arrange(treeID, year) %&gt;%
+     mutate(annual_growth = dbh - lag(dbh)) %&gt;%  # Calculate per-year DBH growth
+     filter(!is.na(annual_growth)) %&gt;%  # Remove first year (no lag value)
+     group_by(species) %&gt;%
+     summarize(mean_growth = mean(annual_growth, na.rm = TRUE),  # Avg growth per species
+               sd_growth = sd(annual_growth, na.rm = TRUE)) %&gt;%  # Std dev per species
+     arrange(desc(mean_growth)) -&gt; species_growth  # Sort species by mean growth rate
+
+ fastest_growth &lt;- head(species_growth, 3)
+ slowest_growth &lt;- tail(species_growth, 3)
+ 
+ list(fastest_growth = fastest_growth, slowest_growth = slowest_growth)</code></pre>
 </div>
+<div class="section level1">
+<table>
+<thead>
+<tr class="header">
+<th align="left">species</th>
+<th align="right">mean_growth</th>
+<th align="right">sd_growth</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">PIRE</td>
+<td align="right">0.1789525</td>
+<td align="right">0.1289417</td>
+</tr>
+<tr class="even">
+<td align="left">POTR</td>
+<td align="right">0.1654035</td>
+<td align="right">0.1087689</td>
+</tr>
+<tr class="odd">
+<td align="left">PIBA</td>
+<td align="right">0.1629762</td>
+<td align="right">0.1234143</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th align="left">species</th>
+<th align="right">mean_growth</th>
+<th align="right">sd_growth</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">QURU</td>
+<td align="right">0.0837715</td>
+<td align="right">0.0434405</td>
+</tr>
+<tr class="even">
+<td align="left">THOC</td>
+<td align="right">0.0764846</td>
+<td align="right">0.0454603</td>
+</tr>
+<tr class="odd">
+<td align="left">LALA</td>
+<td align="right">0.0749381</td>
+<td align="right">0.0563780</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The three fastest-growing species are Pinus resinosa, Populus
+tremuloides, and Pinus banksiana. The three slowest-growing species are
+<em>Quercus rubra, Thuja occidentalis,</em> and <em>Latrix
+laricina</em>.</p>
+<p><img role="img" src="imgs/resinosa05.jpg" width="204" height="28" /></p>
 <div id="rubric" class="section level1">
 <h1>Rubric</h1>
 <p>Created as an R project with a proper project structure (data,
